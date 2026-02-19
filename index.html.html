@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario con Fechas Automáticas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .timestamp-info {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .timestamp-info p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .timestamp-info strong {
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-reset {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .success-message,
+        .error-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 12px;
+            margin-left: 5px;
+            cursor: help;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Formulario de Registro</h1>
+        <p class="subtitle">Las fechas de inicio y finalización se capturan automáticamente</p>
+
+        <div class="timestamp-info">
+            <p><strong>⏱️ Inicio:</strong> <span id="startTime">Cargando...</span></p>
+            <p><strong>✅ Finalización:</strong> Se registrará al enviar el formulario</p>
+        </div>
+
+        <div id="successMessage" class="success-message">
+            ✓ ¡Formulario enviado exitosamente!
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            ✗ Error al enviar el formulario. Por favor, intenta nuevamente.
+        </div>
+
+        <form id="mainForm">
+            <!-- Campo oculto para fecha de inicio -->
+            <input type="hidden" id="fechaInicio" name="fechaInicio">
+            <input type="hidden" id="fechaFin" name="fechaFin">
+
+            <div class="form-group">
+                <label for="nombre">Nombre completo <span class="required">*</span></label>
+                <input type="text" id="nombre" name="nombre" required placeholder="Ej: Juan Pérez García">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo electrónico <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required placeholder="ejemplo@correo.com">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="tel" id="telefono" name="telefono" placeholder="Ej: +52 555 123 4567">
+            </div>
+
+            <div class="form-group">
+                <label for="categoria">Categoría <span class="required">*</span></label>
+                <select id="categoria" name="categoria" required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="Estudiante">Estudiante</option>
+                    <option value="Profesional">Profesional</option>
+                    <option value="Empresa">Empresa</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="comentarios">Comentarios adicionales</label>
+                <textarea id="comentarios" name="comentarios" placeholder="Escribe aquí cualquier información adicional..."></textarea>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px; color: #667eea;">Enviando formulario...</p>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn-submit">Enviar Formulario</button>
+                <button type="reset" class="btn-reset">Limpiar</button>
+            </div>
+        </form>
+
+        <p style="margin-top: 20px; text-align: center; font-size: 12px; color: #999;">
+            Los campos marcados con <span class="required">*</span> son obligatorios
+        </p>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN - CAMBIA ESTA URL
+        // ============================================
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz1CVWvWbQ2HR_-V3wddo37LV93PUTzdg_JBYqcnnHpvBWC5230FqZTBSo8f7hlMJeD/exec';
+        // Ejemplo: 'https://script.google.com/macros/s/AKfycbx.../exec'
+        
+        // ============================================
+        // CAPTURA AUTOMÁTICA DE FECHA DE INICIO
+        // ============================================
+        let startDateTime;
+        
+        function initializeForm() {
+            startDateTime = new Date();
+            document.getElementById('fechaInicio').value = startDateTime.toISOString();
+            
+            // Mostrar fecha de inicio formateada
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('startTime').textContent = startDateTime.toLocaleDateString('es-ES', options);
+        }
+
+        // Inicializar cuando carga la página
+        window.addEventListener('load', initializeForm);
+
+        // ============================================
+        // MANEJO DEL ENVÍO DEL FORMULARIO
+        // ============================================
+        document.getElementById('mainForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Capturar fecha de finalización
+            const endDateTime = new Date();
+            document.getElementById('fechaFin').value = endDateTime.toISOString();
+            
+            // Calcular duración
+            const duration = (endDateTime - startDateTime) / 1000; // en segundos
+            const minutes = Math.floor(duration / 60);
+            const seconds = Math.floor(duration % 60);
+            
+            // Recopilar datos del formulario
+            const formData = {
+                fechaInicio: startDateTime.toLocaleString('es-ES'),
+                fechaFin: endDateTime.toLocaleString('es-ES'),
+                duracion: `${minutes} min ${seconds} seg`,
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                categoria: document.getElementById('categoria').value,
+                comentarios: document.getElementById('comentarios').value
+            };
+
+            // Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.querySelector('.btn-submit').disabled = true;
+
+            try {
+                // Enviar a Google Sheets
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                // Mostrar mensaje de éxito
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Limpiar formulario después de 2 segundos
+                setTimeout(() => {
+                    document.getElementById('mainForm').reset();
+                    document.getElementById('successMessage').style.display = 'none';
+                    document.querySelector('.btn-submit').disabled = false;
+                    initializeForm(); // Reiniciar fecha de inicio
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+                document.querySelector('.btn-submit').disabled = false;
+                
+                setTimeout(() => {
+                    document.getElementById('errorMessage').style.display = 'none';
+                }, 3000);
+            }
+        });
+
+        // ============================================
+        // ALTERNATIVA: GUARDAR EN GOOGLE SHEETS
+        // Si no tienes el script configurado, los datos
+        // se pueden enviar por email o guardar localmente
+        // ============================================
+        
+        // Para desarrollo/prueba: mostrar datos en consola
+        if (GOOGLE_SCRIPT_URL === 'TU_URL_DE_WEB_APP_AQUI') {
+            console.warn('⚠️ IMPORTANTE: Configura GOOGLE_SCRIPT_URL para guardar en Google Sheets');
+            console.log('📝 Los datos del formulario se mostrarán en la consola hasta que configures la conexión');
+        }
+    </script>
+</body>
+</html>
